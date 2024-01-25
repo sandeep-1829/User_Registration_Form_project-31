@@ -4,8 +4,12 @@ from django.shortcuts import render
 from django.http import HttpResponse,HttpResponseRedirect
 from app.forms import *
 from django.core. mail import send_mail
-from django.contrib.auth import authenticate,login
+from django.contrib.auth import authenticate,login,logout
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
+
+
+
 def registration(request):
     ufo=UserForm()
     pfo=ProfileForm()
@@ -53,6 +57,23 @@ def user_login(request):
             request.session['username']=username 
             return HttpResponseRedirect(reverse('home'))
     return render(request,'user_login.html')
+
+
+
+@login_required
+def user_logout(request):
+    logout(request)
+    return HttpResponseRedirect(reverse('home'))
+
+@login_required
+def display_profile(request):
+    un=request.session.get('username')
+    UO=User.objects.get(username=un)
+    PO=Profile.objects.get(username=UO)
+    d={'UO':UO,'PO':PO}
+    return render(request,'display_profile.html',d)
+
+
 
 
 
