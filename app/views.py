@@ -46,6 +46,7 @@ def home(request):
         d={'username':username}
         return render(request,'home.html',d)
     return render(request,'home.html')
+    
 
 def user_login(request):
     if request.method=='POST':
@@ -56,7 +57,10 @@ def user_login(request):
             login(request,AUO)
             request.session['username']=username 
             return HttpResponseRedirect(reverse('home'))
+        else:
+            return HttpResponse('Invalid Credentials')
     return render(request,'user_login.html')
+        
 
 
 
@@ -73,6 +77,38 @@ def display_profile(request):
     d={'UO':UO,'PO':PO}
     return render(request,'display_profile.html',d)
 
+
+@login_required
+def change_password(request):
+    if request.method=='POST':
+        pw=request.POST['pw']
+        username=request.session.get('username')
+        UO=User.objects.get(username=username)
+        UO.set_password(pw)
+        UO.save()
+        # return HttpResponse('Password Changed Sucessfully..')
+        return HttpResponseRedirect(reverse('user_login'))
+
+    return render(request,'change_password.html')
+
+
+
+
+def forgot_password(request):
+    if request.method=='POST':
+        username=request.POST['un']
+        password=request.POST['pw']
+        LUO=User.objects.filter(username=username)
+        if LUO:
+            UO=LUO[0]
+            UO.set_password(password)
+            UO.save()
+            return HttpResponse('Reset password is done successfully...')
+            # return HttpResponseRedirect(reverse('user_login'))
+        else:
+            return HttpResponse('User name not found in database')
+
+    return render(request,'forgot_password.html')
 
 
 
